@@ -197,11 +197,16 @@ if not df.empty:
             for _, row in feature_importance.iterrows():
                 feature_name = row['Feature']
                 impact = row['Impact']
-                
-                if "Industry" in feature_name:
-                    desc = "Your Industry"
-                    detail = f"The {industry} sector typically sees:"
-                    stats = df[df['Industry']==industry].agg({
+
+                desc = "Other Factor"
+                detail = "Impact details not available"
+                stats = None
+
+                if "Industry_" in feature_name:
+                    industry_value = feature_name.split('Industry_')[1]
+                    desc = f"Industry: {industry_value}"
+                    detail = f"The {industry_value} sector typically sees:"
+                    stats = df[df['Industry'] == industry_value].agg({
                         'Revenue Increase Due to AI (%)': ['mean', 'std'],
                         'Job Loss Due to AI (%)': ['mean']
                     })
@@ -213,20 +218,22 @@ if not df.empty:
                     desc = "Team Collaboration"
                     detail = "Collaboration benefits:"
                     stats = "Reduces job impact by {:.1f}%".format(abs(impact) * 10)
-                elif "Regulation" in feature_name:
-                    desc = "Regulation Level"
-                    detail = f"{regulation} regulation tends to:"
-                    stats = df[df['Regulation Status']==regulation].agg({
+                elif "Regulation_" in feature_name:
+                    regulation_value = feature_name.split('Regulation_')[1]
+                    desc = f"Regulation Level: {regulation_value}"
+                    detail = f"{regulation_value} regulation effects:"
+                    stats = df[df['Regulation Status'] == regulation_value].agg({
                         'Revenue Increase Due to AI (%)': ['mean'],
                         'Job Loss Due to AI (%)': ['mean']
                     })
-                
+
                 with st.expander(f"{desc} → {impact:.1f}% impact"):
                     st.markdown(f"{detail}")
                     if isinstance(stats, pd.DataFrame):
                         st.dataframe(stats.style.format("{:.1f}%"))
                     else:
                         st.markdown(stats)
+
 
     with tab2:
         st.header("🛠️ AI Tools Comparison")
